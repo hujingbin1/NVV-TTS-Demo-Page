@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="zh" data-page-node-id="txhGrKjjCbGCEcWj2vVYHQ">
+<head data-page-node-id="O7Bd1VRKUGACC1cvfTy1Q1">
+<meta charset="utf-8" data-page-node-id="TpbiOLMr1c8QLM5SYl0IYZ">
+<meta name="viewport" content="width=device-width, initial-scale=1" data-page-node-id="nHJEd0bpU2CDGbBMTQWU9s">
+<title>NVV-TTS Demo · Preference Optimization with LALM Feedback</title>
+<style>
+:root{--bg0:#080a11;--bg1:#0e1424;--glass:rgba(255,255,255,.045);--glass2:rgba(255,255,255,.07);
+  --line:rgba(255,255,255,.10);--ink:#eef1f8;--muted:#9aa6bd;--c1:#6ee7ff;--c2:#a78bfa;--gold:#ffc061;--ok:#3ee0a1;}
+*{box-sizing:border-box}html{scroll-behavior:smooth}
+body{margin:0;background:
+   radial-gradient(1200px 700px at 80% -10%,rgba(167,139,250,.18),transparent 60%),
+   radial-gradient(1000px 600px at 0% 0%,rgba(110,231,255,.14),transparent 55%),
+   linear-gradient(180deg,var(--bg0),var(--bg1));color:var(--ink);min-height:100vh;
+  font:14px/1.6 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"PingFang SC","Microsoft YaHei",sans-serif}
+a{color:inherit;text-decoration:none}
+.wrap{max-width:1180px;margin:0 auto;padding:0 20px}
+.topbar{display:flex;justify-content:flex-end;padding:12px 20px 0}
+.langbtn{border:1px solid var(--line);background:var(--glass2);color:var(--ink);border-radius:999px;padding:6px 14px;font-size:13px;cursor:pointer;backdrop-filter:blur(8px)}
+.langbtn:hover{border-color:var(--c2)}
+.hero{padding:10px 20px 30px;text-align:center}
+.brand{display:inline-flex;align-items:center;gap:9px;font-size:12.5px;font-weight:700;letter-spacing:.06em;
+  padding:7px 16px;border-radius:999px;color:#07101c;background:linear-gradient(120deg,var(--c1),var(--c2) 55%,var(--gold));box-shadow:0 8px 26px rgba(167,139,250,.35)}
+.brand .dot{width:7px;height:7px;border-radius:50%;background:#07101c;opacity:.5}
+.hero h1{font-size:clamp(26px,5vw,50px);line-height:1.06;margin:16px 0 8px;font-weight:800;
+  background:linear-gradient(100deg,var(--c1),var(--c2) 45%,var(--gold));-webkit-background-clip:text;background-clip:text;color:transparent;background-size:200% auto;animation:shine 8s linear infinite}
+@keyframes shine{to{background-position:200% center}}
+.paper{max-width:820px;margin:12px auto 0;padding:14px 18px;border:1px solid var(--line);border-radius:14px;
+  background:var(--glass);backdrop-filter:blur(6px)}
+.paper .lab{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--c1);margin-bottom:6px}
+.paper .ttl{font-size:16px;font-weight:700;color:var(--ink);font-style:italic}
+.sub{color:var(--muted);max-width:760px;margin:16px auto 0;font-size:14px}
+.sub .en{display:block;margin-top:6px;color:#8290a8;font-size:13px}
+.stats{display:flex;gap:26px;justify-content:center;margin:24px 0 6px;flex-wrap:wrap}
+.stat b{display:block;font-size:30px;font-weight:800;background:linear-gradient(120deg,var(--c1),var(--c2));-webkit-background-clip:text;background-clip:text;color:transparent}
+.stat span{color:var(--muted);font-size:12px;letter-spacing:.05em}
+.legend{display:flex;gap:10px;justify-content:center;flex-wrap:wrap;margin-top:22px}
+.chip{font-size:12px;padding:6px 12px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted)}
+.chip.ours{border-color:rgba(255,192,97,.5);color:var(--gold);background:rgba(255,192,97,.08);font-weight:600}
+nav.cats{position:sticky;top:0;z-index:30;backdrop-filter:blur(12px);background:rgba(8,10,17,.72);border-bottom:1px solid var(--line);padding:10px 0}
+nav.cats .row{display:flex;gap:8px;overflow-x:auto;padding-bottom:2px}
+nav.cats a{flex:0 0 auto;font-size:13px;padding:7px 13px;border-radius:999px;border:1px solid var(--line);background:var(--glass);color:var(--muted);white-space:nowrap;transition:.2s}
+nav.cats a:hover{color:var(--ink);border-color:var(--c2)}
+nav.cats a.active{color:#07101c;background:linear-gradient(120deg,var(--c1),var(--c2));border-color:transparent;font-weight:700}
+section.cat{padding:40px 0 8px;scroll-margin-top:70px}
+.cat-h{display:flex;align-items:center;gap:14px;margin-bottom:6px}
+.cat-emoji{font-size:34px;filter:drop-shadow(0 4px 12px rgba(0,0,0,.4))}
+.cat-h h2{margin:0;font-size:26px;font-weight:800}
+.cat-h .zh{color:var(--muted);font-weight:600;font-size:18px;margin-left:4px}
+.cat-h .n{margin-left:auto;font-size:12px;color:var(--muted);border:1px solid var(--line);padding:3px 10px;border-radius:999px}
+.cat-rule{height:1px;background:linear-gradient(90deg,var(--c2),transparent);opacity:.5;margin:8px 0 18px}
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:18px}
+@media(max-width:860px){.cols{grid-template-columns:1fr}}
+.langcol>h3{font-size:12px;letter-spacing:.14em;color:var(--muted);text-transform:uppercase;margin:0 0 10px;display:flex;gap:8px;align-items:center}
+.langcol>h3 .dot{width:8px;height:8px;border-radius:50%}
+.dot.zh{background:var(--gold)}.dot.en{background:var(--c1)}
+.case{background:var(--glass);border:1px solid var(--line);border-radius:16px;padding:16px 16px 12px;margin-bottom:16px;opacity:0;transform:translateY(14px);transition:opacity .6s,transform .6s;box-shadow:0 10px 30px rgba(0,0,0,.25)}
+.case.in{opacity:1;transform:none}
+.case .id{font-family:ui-monospace,Menlo,monospace;font-size:11px;color:var(--muted)}
+.case .txt{font-size:16px;margin:8px 0 14px}
+.case .txt mark{background:linear-gradient(120deg,rgba(255,192,97,.25),rgba(167,139,250,.25));color:var(--gold);padding:1px 6px;border-radius:6px;font-weight:700}
+.m{display:grid;grid-template-columns:1fr;gap:8px}
+.mrow{display:flex;flex-direction:column;gap:5px;padding:9px 11px;border-radius:11px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.mrow.ours{border-color:rgba(255,192,97,.42);background:linear-gradient(120deg,rgba(255,192,97,.07),rgba(167,139,250,.07));box-shadow:0 0 0 1px rgba(255,192,97,.15),0 6px 20px rgba(167,139,250,.10)}
+.mlabel{font-size:12px;color:var(--muted);display:flex;align-items:center;gap:7px}
+.mrow.ours .mlabel{color:var(--gold);font-weight:700}
+.tag-ours{font-size:10px;padding:1px 6px;border-radius:999px;background:linear-gradient(120deg,var(--c1),var(--gold));color:#0a0f1c;font-weight:800}
+audio{width:100%;height:32px}
+.empty{text-align:center;color:var(--muted);padding:90px 20px;font-size:15px}
+footer{text-align:center;color:var(--muted);font-size:12px;padding:40px 0 60px}
+.backtop{position:fixed;right:18px;bottom:18px;width:44px;height:44px;border-radius:50%;border:1px solid var(--line);background:var(--glass2);color:var(--ink);cursor:pointer;font-size:18px;backdrop-filter:blur(8px);display:none;z-index:40}
+</style>
+</head>
+<body data-lang="zh" data-page-node-id="4UTD1FC7qkjtX9b6NqTGkT">
+<div class="topbar" data-page-node-id="VJKqUQjngDpjTNRfNCCccE"><button class="langbtn" id="langbtn" data-page-node-id="jGwKiEkSxeSnkWERxtI4WE">EN</button></div>
+<div class="hero wrap" data-page-node-id="3AXjFNUcR45qqQcThewIeK">
+  <div class="brand" data-page-node-id="3hTtyw53UsQQkV96Hs0oLK"><span id="b1" data-page-node-id="NDTik0nB3baJIekYi0fv43">NVVSpeech Challenge</span><span class="dot" data-page-node-id="Rqy2HQH8ZjH1qWFqw79itP"></span><span id="b2" data-page-node-id="psdMmHkehhvPNuGbUQigmX">Track 2 · NVV-TTS</span></div>
+  <h1 id="t-title" data-page-node-id="uIuQN1q6ZhjGzOkkhGJTmi"></h1>
+  <div class="paper" data-page-node-id="g52L951HWGczzXWw3rJDsN"><div class="lab" id="t-paperlab" data-page-node-id="xF0HQrDnwB3xoAxgoI4y8D"></div>
+    <div class="ttl" data-page-node-id="7o8CdXaRD8UNKQLuy9WxR6">Preference Optimization with LALM Feedback for Continuous Autoregressive Non-Verbal Vocalization Generation</div></div>
+  <p class="sub" id="t-sub" data-page-node-id="LPaIaKdVpZek4QllRtSfev"></p>
+  <div class="stats" data-page-node-id="TaLZDvqlMC6Ro94sxSt0Ji">
+    <div class="stat" data-page-node-id="HgcYP3uGTKeRFPxJsoZVBP"><b id="s-cases" data-page-node-id="BKavuHImq2JcD80facBjr0">–</b><span id="t-cases" data-page-node-id="epYixJKSAfnBLzLLHUR4At"></span></div>
+    <div class="stat" data-page-node-id="IrvK41Bzo6p6efgE2d0HB2"><b id="s-cats" data-page-node-id="ObNhWgh8ZnXbpyt2r5ivga">–</b><span id="t-cats" data-page-node-id="fGeSB5zA0OMGQRgNzfKrLB"></span></div>
+    <div class="stat" data-page-node-id="5prAXGeI9M2eMtLEeGk4Xk"><b id="s-methods" data-page-node-id="fmtPF2Qc2FJQir6EXbpkHb">5</b><span id="t-methods" data-page-node-id="3PYX63uHI7liz1afJHjkDW"></span></div>
+  </div>
+  <div class="legend" id="legend" data-page-node-id="LdEABXf3vRGzIhg6tKPjEb"></div>
+</div>
+<nav class="cats" data-page-node-id="WLhHv6v7VoGAJmlYooAR8P"><div class="wrap" data-page-node-id="CBEyVbhIFjl9HQP7SIFZlj"><div class="row" id="catnav" data-page-node-id="xT6k7ctZPK2uLqC6bqCbUX"></div></div></nav>
+<main class="wrap" id="main" data-page-node-id="f3fcRlFF8QD77vV7GcBjit"></main>
+<footer id="foot" data-page-node-id="Xap84Kx1iCPWTEnqUMAIEW"></footer>
+<button class="backtop" id="backtop" title="Top" data-page-node-id="FMueF33AKfB2v6r4U0Vbdv">↑</button>
+<script>
+const PAPER="Preference Optimization with LALM Feedback for Continuous Autoregressive Non-Verbal Vocalization Generation";
+const SUB_ZH="按非言语发声(NVV)类别组织，每类并列展示 中文 / English 两个样例，横向对比五种方法的合成效果。";
+const SUB_EN="Organized by Non-Verbal Vocalization (NVV) category; each category shows a Chinese and an English sample, comparing five methods side by side.";
+const T={
+ zh:{title:"NVV-TTS 方法对比 Showcase",paperlab:"本页为以下论文的样例演示 · Demo for our paper",
+   cases:"样例 CASES",cats:"类别 CATEGORIES",methods:"方法 METHODS",zh:"中文",en:"English",
+   foot:(n,c)=>`本论文演示 · 共 ${n} 个样例 / ${c} 个类别 · Track 2 (NVV-TTS)`},
+ en:{title:"NVV-TTS Method Comparison Showcase",paperlab:"Demo for our paper · 本页为以下论文的样例演示",
+   cases:"CASES",cats:"CATEGORIES",methods:"METHODS",zh:"Chinese",en:"English",
+   foot:(n,c)=>`Paper demo · ${n} cases across ${c} categories · Track 2 (NVV-TTS)`}
+};
+const EMO={burp:"🫧",sigh:"😮‍💨",sniff:"👃",moan:"😩",breath:"🌬️",lipsmack:"👄",cough:"😷",yawn:"🥱",cry:"😢",hum:"🎵",hiss:"🐍",gasp:"😲",sneeze:"🤧",snore:"😴","throat clearing":"🗣️",laugh:"😄"};
+const ZH={burp:"打嗝",sigh:"叹气",sniff:"吸鼻",moan:"呻吟",breath:"呼吸",lipsmack:"咂嘴",cough:"咳嗽",yawn:"打哈欠",cry:"哭泣",hum:"哼唱",hiss:"嘶声",gasp:"倒吸气",sneeze:"打喷嚏",snore:"打鼾","throat clearing":"清嗓",laugh:"笑"};
+let LANG=localStorage.getItem("nvv_ui_lang")||"zh", DATA=null;
+const NVV_MANIFEST={"methods": [{"key": "baseline", "label": "Baseline", "dir": "baseline", "ours": false}, {"key": "rsft", "label": "RSFT (Cold Start)", "dir": "rsft", "ours": false}, {"key": "flow_dpo", "label": "Flow-DPO (w/o SFT loss)", "dir": "flow_dpo", "ours": false}, {"key": "ours_wo", "label": "RSFT + Flow-DPO (w/o SFT loss)", "dir": "rsft_flow_dpo", "ours": false}, {"key": "ours_w", "label": "RSFT + Flow-DPO (w/ SFT loss, Ours)", "dir": "rsft_flow_dpo_sft", "ours": true}], "items": [{"id": "en_0004", "lang": "en", "event": "burp", "text": "I was so thirsty, I think I inhaled that whole can. Whoa, excuse me. So much fizz.", "text_marked": "I was so thirsty, I think I inhaled that whole can. [burp] Whoa, excuse me. So much fizz."}, {"id": "en_0205", "lang": "en", "event": "breath", "text": "Stop, stop, I can't... the look on his face when the wig fell in the soup... I'm actually crying.", "text_marked": "Stop, stop, I can't... [breath] the look on his face when the wig fell in the soup... I'm actually crying."}, {"id": "en_0306", "lang": "en", "event": "cough", "text": "A 'sure thing'? Right. And you based this on... what, exactly? A feeling in your gut?", "text_marked": "[cough] A 'sure thing'? Right. And you based this on... what, exactly? A feeling in your gut?"}, {"id": "en_0404", "lang": "en", "event": "cry", "text": "It's all my fault. I never should have let him go. I'm so, so sorry.", "text_marked": "It's all my fault. I never should have let him go. [cry] I'm so, so sorry."}, {"id": "en_0559", "lang": "en", "event": "gasp", "text": "Wait a second... Is that... my mother? But this photo was taken five years before she was even born.", "text_marked": "Wait a second... Is that... [gasp] my mother? But this photo was taken five years before she was even born."}, {"id": "en_0515", "lang": "en", "event": "hiss", "text": "You have no idea what he's capable of. The things I've seen...", "text_marked": "You have no idea what he's capable of. [hiss] The things I've seen..."}, {"id": "en_0465", "lang": "en", "event": "hum", "text": "There we go. Just a little adjustment to this petal. It's looking absolutely lovely.", "text_marked": "There we go. [hum] Just a little adjustment to this petal. It's looking absolutely lovely."}, {"id": "en_0768", "lang": "en", "event": "laugh", "text": "Stop, stop! The way the dog just slid into the wall... I'm losing it!", "text_marked": "Stop, stop! The way the dog just slid into the wall... [laugh] I'm losing it!"}, {"id": "en_0268", "lang": "en", "event": "lipsmack", "text": "Alright, here we go. The final boss. I've been waiting for this moment.", "text_marked": "Alright, here we go. [lipsmack] The final boss. I've been waiting for this moment."}, {"id": "en_0190", "lang": "en", "event": "moan", "text": "No... no, you're lying. It can't be true.", "text_marked": "No... no, you're lying. [moan] It can't be true."}, {"id": "en_0077", "lang": "en", "event": "sigh", "text": "I've gone over the numbers a dozen times. There's just no way. We're going to have to let him go.", "text_marked": "I've gone over the numbers a dozen times. [sigh] There's just no way. We're going to have to let him go."}, {"id": "en_0634", "lang": "en", "event": "sneeze", "text": "No, I'm fine, really! My allergies are totally under con... under con... trol. See? Barely a tickle.", "text_marked": "No, I'm fine, really! My allergies are totally under con... under con... [sneeze] ...trol. See? Barely a tickle."}, {"id": "en_0129", "lang": "en", "event": "sniff", "text": "No, I'm alright. Just... just give me a minute. The allergies are acting up again.", "text_marked": "No, I'm alright. Just... just give me a minute. [sniff] The allergies are acting up again."}, {"id": "en_0671", "lang": "en", "event": "snore", "text": "Are you even listening to me? I'm pouring my heart out here and you... Great. Just great.", "text_marked": "Are you even listening to me? I'm pouring my heart out here and you... [snore] Great. Just great."}, {"id": "en_0724", "lang": "en", "event": "throat clearing", "text": "While I appreciate the enthusiasm, Robert, we do need to address the... less favorable projections from the third quarter.", "text_marked": "[throat clearing] While I appreciate the enthusiasm, Robert, we do need to address the... less favorable projections from the third quarter."}, {"id": "en_0376", "lang": "en", "event": "yawn", "text": "No, I'm... I'm totally listening. It's just... what were you saying about the quarterly reports?", "text_marked": "No, I'm... [yawn] I'm totally listening. It's just... what were you saying about the quarterly reports?"}, {"id": "zh_0203", "lang": "zh", "event": "breath", "text": "不行了……这烟味太呛了……我得出去透透气……", "text_marked": "不行了……[breath] 这烟味太呛了……我得出去透透气……"}, {"id": "zh_0024", "lang": "zh", "event": "burp", "text": "来，听我口令，一、二、三，起！", "text_marked": "来，听我口令，一、二、三，[burp] 起！"}, {"id": "zh_0324", "lang": "zh", "event": "cough", "text": "那个，关于昨天的事，我想跟你解释一下。", "text_marked": "[cough] 那个，关于昨天的事，我想跟你解释一下。"}, {"id": "zh_0426", "lang": "zh", "event": "cry", "text": "为什么，为什么你就是不肯相信我，我真的没有骗你。", "text_marked": "为什么，[cry] 为什么你就是不肯相信我，[cry] 我真的没有骗你。"}, {"id": "zh_0579", "lang": "zh", "event": "gasp", "text": "你... 你怎么会在这里？不，不可能！", "text_marked": "你... [gasp] 你怎么会在这里？不，不可能！"}, {"id": "zh_0529", "lang": "zh", "event": "hiss", "text": "你竟敢这样跟我说话？你这只肮脏的老鼠。", "text_marked": "你竟敢这样跟我说话？[hiss] 你这只肮脏的老鼠。"}, {"id": "zh_0476", "lang": "zh", "event": "hum", "text": "今天天气真好，我的小花们也长得真精神。", "text_marked": "[hum] 今天天气真好，我的小花们也长得真精神。"}, {"id": "zh_0773", "lang": "zh", "event": "laugh", "text": "别说了，一想到那个画面我就想笑。", "text_marked": "别说了，[laugh] 一想到那个画面我就想笑。"}, {"id": "zh_0281", "lang": "zh", "event": "lipsmack", "text": "哎哟哟，我的小乖乖，怎么哭成这样了？不哭不哭啊。", "text_marked": "哎哟哟，我的小乖乖，[lipsmack] 怎么哭成这样了？不哭不哭啊。"}, {"id": "zh_0188", "lang": "zh", "event": "moan", "text": "太舒服了，感觉一天的疲劳都消失了。", "text_marked": "[moan] 太舒服了，感觉一天的疲劳都消失了。"}, {"id": "zh_0088", "lang": "zh", "event": "sigh", "text": "怎么跟你说呢，这事儿其实挺复杂的，我也挺为难的。", "text_marked": "怎么跟你说呢，[sigh] 这事儿其实挺复杂的，我也挺为难的。"}, {"id": "zh_0617", "lang": "zh", "event": "sneeze", "text": "不好意思啊，最近降温，我好像有点……感冒了。", "text_marked": "不好意思啊，最近降温，我好像有点……[sneeze] 感冒了。"}, {"id": "zh_0129", "lang": "zh", "event": "sniff", "text": "就靠这点钱也想收买我？你太天真了。", "text_marked": "就靠这点钱也想收买我？[sniff] 你太天真了。"}, {"id": "zh_0685", "lang": "zh", "event": "snore", "text": "嗯……好……明天……明天再说……", "text_marked": "嗯……好……明天……明天再说……[snore]……"}, {"id": "zh_0733", "lang": "zh", "event": "throat clearing", "text": "那个，关于上次我借钱的事，我想跟你谈谈。", "text_marked": "[throat clearing] 那个，关于上次我借钱的事，我想跟你谈谈。"}, {"id": "zh_0385", "lang": "zh", "event": "yawn", "text": "我实在太困了，不聊了，我得去睡觉了。", "text_marked": "我实在太困了, [yawn] 不聊了, 我得去睡觉了。"}]};
+const NVV_SEL=[{"id": "en_0004", "lang": "en", "event": "burp", "note": ""}, {"id": "en_0205", "lang": "en", "event": "breath", "note": ""}, {"id": "en_0306", "lang": "en", "event": "cough", "note": ""}, {"id": "en_0404", "lang": "en", "event": "cry", "note": ""}, {"id": "en_0559", "lang": "en", "event": "gasp", "note": ""}, {"id": "en_0515", "lang": "en", "event": "hiss", "note": ""}, {"id": "en_0465", "lang": "en", "event": "hum", "note": ""}, {"id": "en_0768", "lang": "en", "event": "laugh", "note": ""}, {"id": "en_0268", "lang": "en", "event": "lipsmack", "note": ""}, {"id": "en_0190", "lang": "en", "event": "moan", "note": ""}, {"id": "en_0077", "lang": "en", "event": "sigh", "note": ""}, {"id": "en_0634", "lang": "en", "event": "sneeze", "note": ""}, {"id": "en_0129", "lang": "en", "event": "sniff", "note": ""}, {"id": "en_0671", "lang": "en", "event": "snore", "note": ""}, {"id": "en_0724", "lang": "en", "event": "throat clearing", "note": ""}, {"id": "en_0376", "lang": "en", "event": "yawn", "note": ""}, {"id": "zh_0203", "lang": "zh", "event": "breath", "note": ""}, {"id": "zh_0024", "lang": "zh", "event": "burp", "note": ""}, {"id": "zh_0324", "lang": "zh", "event": "cough", "note": ""}, {"id": "zh_0426", "lang": "zh", "event": "cry", "note": ""}, {"id": "zh_0579", "lang": "zh", "event": "gasp", "note": ""}, {"id": "zh_0529", "lang": "zh", "event": "hiss", "note": ""}, {"id": "zh_0476", "lang": "zh", "event": "hum", "note": ""}, {"id": "zh_0773", "lang": "zh", "event": "laugh", "note": ""}, {"id": "zh_0281", "lang": "zh", "event": "lipsmack", "note": ""}, {"id": "zh_0188", "lang": "zh", "event": "moan", "note": ""}, {"id": "zh_0088", "lang": "zh", "event": "sigh", "note": ""}, {"id": "zh_0617", "lang": "zh", "event": "sneeze", "note": ""}, {"id": "zh_0129", "lang": "zh", "event": "sniff", "note": ""}, {"id": "zh_0685", "lang": "zh", "event": "snore", "note": ""}, {"id": "zh_0733", "lang": "zh", "event": "throat clearing", "note": ""}, {"id": "zh_0385", "lang": "zh", "event": "yawn", "note": ""}];
+const AUDIO={"baseline":{"en_0004":"audio/baseline/en_0004.mp3","en_0205":"audio/baseline/en_0205.mp3","en_0306":"audio/baseline/en_0306.mp3","en_0404":"audio/baseline/en_0404.mp3","en_0559":"audio/baseline/en_0559.mp3","en_0515":"audio/baseline/en_0515.mp3","en_0465":"audio/baseline/en_0465.mp3","en_0768":"audio/baseline/en_0768.mp3","en_0268":"audio/baseline/en_0268.mp3","en_0190":"audio/baseline/en_0190.mp3","en_0077":"audio/baseline/en_0077.mp3","en_0634":"audio/baseline/en_0634.mp3","en_0129":"audio/baseline/en_0129.mp3","en_0671":"audio/baseline/en_0671.mp3","en_0724":"audio/baseline/en_0724.mp3","en_0376":"audio/baseline/en_0376.mp3","zh_0203":"audio/baseline/zh_0203.mp3","zh_0024":"audio/baseline/zh_0024.mp3","zh_0324":"audio/baseline/zh_0324.mp3","zh_0426":"audio/baseline/zh_0426.mp3","zh_0579":"audio/baseline/zh_0579.mp3","zh_0529":"audio/baseline/zh_0529.mp3","zh_0476":"audio/baseline/zh_0476.mp3","zh_0773":"audio/baseline/zh_0773.mp3","zh_0281":"audio/baseline/zh_0281.mp3","zh_0188":"audio/baseline/zh_0188.mp3","zh_0088":"audio/baseline/zh_0088.mp3","zh_0617":"audio/baseline/zh_0617.mp3","zh_0129":"audio/baseline/zh_0129.mp3","zh_0685":"audio/baseline/zh_0685.mp3","zh_0733":"audio/baseline/zh_0733.mp3","zh_0385":"audio/baseline/zh_0385.mp3"},"rsft":{"en_0004":"audio/rsft/en_0004.mp3","en_0205":"audio/rsft/en_0205.mp3","en_0306":"audio/rsft/en_0306.mp3","en_0404":"audio/rsft/en_0404.mp3","en_0559":"audio/rsft/en_0559.mp3","en_0515":"audio/rsft/en_0515.mp3","en_0465":"audio/rsft/en_0465.mp3","en_0768":"audio/rsft/en_0768.mp3","en_0268":"audio/rsft/en_0268.mp3","en_0190":"audio/rsft/en_0190.mp3","en_0077":"audio/rsft/en_0077.mp3","en_0634":"audio/rsft/en_0634.mp3","en_0129":"audio/rsft/en_0129.mp3","en_0671":"audio/rsft/en_0671.mp3","en_0724":"audio/rsft/en_0724.mp3","en_0376":"audio/rsft/en_0376.mp3","zh_0203":"audio/rsft/zh_0203.mp3","zh_0024":"audio/rsft/zh_0024.mp3","zh_0324":"audio/rsft/zh_0324.mp3","zh_0426":"audio/rsft/zh_0426.mp3","zh_0579":"audio/rsft/zh_0579.mp3","zh_0529":"audio/rsft/zh_0529.mp3","zh_0476":"audio/rsft/zh_0476.mp3","zh_0773":"audio/rsft/zh_0773.mp3","zh_0281":"audio/rsft/zh_0281.mp3","zh_0188":"audio/rsft/zh_0188.mp3","zh_0088":"audio/rsft/zh_0088.mp3","zh_0617":"audio/rsft/zh_0617.mp3","zh_0129":"audio/rsft/zh_0129.mp3","zh_0685":"audio/rsft/zh_0685.mp3","zh_0733":"audio/rsft/zh_0733.mp3","zh_0385":"audio/rsft/zh_0385.mp3"},"flow_dpo":{"en_0004":"audio/flow_dpo/en_0004.mp3","en_0205":"audio/flow_dpo/en_0205.mp3","en_0306":"audio/flow_dpo/en_0306.mp3","en_0404":"audio/flow_dpo/en_0404.mp3","en_0559":"audio/flow_dpo/en_0559.mp3","en_0515":"audio/flow_dpo/en_0515.mp3","en_0465":"audio/flow_dpo/en_0465.mp3","en_0768":"audio/flow_dpo/en_0768.mp3","en_0268":"audio/flow_dpo/en_0268.mp3","en_0190":"audio/flow_dpo/en_0190.mp3","en_0077":"audio/flow_dpo/en_0077.mp3","en_0634":"audio/flow_dpo/en_0634.mp3","en_0129":"audio/flow_dpo/en_0129.mp3","en_0671":"audio/flow_dpo/en_0671.mp3","en_0724":"audio/flow_dpo/en_0724.mp3","en_0376":"audio/flow_dpo/en_0376.mp3","zh_0203":"audio/flow_dpo/zh_0203.mp3","zh_0024":"audio/flow_dpo/zh_0024.mp3","zh_0324":"audio/flow_dpo/zh_0324.mp3","zh_0426":"audio/flow_dpo/zh_0426.mp3","zh_0579":"audio/flow_dpo/zh_0579.mp3","zh_0529":"audio/flow_dpo/zh_0529.mp3","zh_0476":"audio/flow_dpo/zh_0476.mp3","zh_0773":"audio/flow_dpo/zh_0773.mp3","zh_0281":"audio/flow_dpo/zh_0281.mp3","zh_0188":"audio/flow_dpo/zh_0188.mp3","zh_0088":"audio/flow_dpo/zh_0088.mp3","zh_0617":"audio/flow_dpo/zh_0617.mp3","zh_0129":"audio/flow_dpo/zh_0129.mp3","zh_0685":"audio/flow_dpo/zh_0685.mp3","zh_0733":"audio/flow_dpo/zh_0733.mp3","zh_0385":"audio/flow_dpo/zh_0385.mp3"},"rsft_flow_dpo":{"en_0004":"audio/rsft_flow_dpo/en_0004.mp3","en_0205":"audio/rsft_flow_dpo/en_0205.mp3","en_0306":"audio/rsft_flow_dpo/en_0306.mp3","en_0404":"audio/rsft_flow_dpo/en_0404.mp3","en_0559":"audio/rsft_flow_dpo/en_0559.mp3","en_0515":"audio/rsft_flow_dpo/en_0515.mp3","en_0465":"audio/rsft_flow_dpo/en_0465.mp3","en_0768":"audio/rsft_flow_dpo/en_0768.mp3","en_0268":"audio/rsft_flow_dpo/en_0268.mp3","en_0190":"audio/rsft_flow_dpo/en_0190.mp3","en_0077":"audio/rsft_flow_dpo/en_0077.mp3","en_0634":"audio/rsft_flow_dpo/en_0634.mp3","en_0129":"audio/rsft_flow_dpo/en_0129.mp3","en_0671":"audio/rsft_flow_dpo/en_0671.mp3","en_0724":"audio/rsft_flow_dpo/en_0724.mp3","en_0376":"audio/rsft_flow_dpo/en_0376.mp3","zh_0203":"audio/rsft_flow_dpo/zh_0203.mp3","zh_0024":"audio/rsft_flow_dpo/zh_0024.mp3","zh_0324":"audio/rsft_flow_dpo/zh_0324.mp3","zh_0426":"audio/rsft_flow_dpo/zh_0426.mp3","zh_0579":"audio/rsft_flow_dpo/zh_0579.mp3","zh_0529":"audio/rsft_flow_dpo/zh_0529.mp3","zh_0476":"audio/rsft_flow_dpo/zh_0476.mp3","zh_0773":"audio/rsft_flow_dpo/zh_0773.mp3","zh_0281":"audio/rsft_flow_dpo/zh_0281.mp3","zh_0188":"audio/rsft_flow_dpo/zh_0188.mp3","zh_0088":"audio/rsft_flow_dpo/zh_0088.mp3","zh_0617":"audio/rsft_flow_dpo/zh_0617.mp3","zh_0129":"audio/rsft_flow_dpo/zh_0129.mp3","zh_0685":"audio/rsft_flow_dpo/zh_0685.mp3","zh_0733":"audio/rsft_flow_dpo/zh_0733.mp3","zh_0385":"audio/rsft_flow_dpo/zh_0385.mp3"},"rsft_flow_dpo_sft":{"en_0004":"audio/rsft_flow_dpo_sft/en_0004.mp3","en_0205":"audio/rsft_flow_dpo_sft/en_0205.mp3","en_0306":"audio/rsft_flow_dpo_sft/en_0306.mp3","en_0404":"audio/rsft_flow_dpo_sft/en_0404.mp3","en_0559":"audio/rsft_flow_dpo_sft/en_0559.mp3","en_0515":"audio/rsft_flow_dpo_sft/en_0515.mp3","en_0465":"audio/rsft_flow_dpo_sft/en_0465.mp3","en_0768":"audio/rsft_flow_dpo_sft/en_0768.mp3","en_0268":"audio/rsft_flow_dpo_sft/en_0268.mp3","en_0190":"audio/rsft_flow_dpo_sft/en_0190.mp3","en_0077":"audio/rsft_flow_dpo_sft/en_0077.mp3","en_0634":"audio/rsft_flow_dpo_sft/en_0634.mp3","en_0129":"audio/rsft_flow_dpo_sft/en_0129.mp3","en_0671":"audio/rsft_flow_dpo_sft/en_0671.mp3","en_0724":"audio/rsft_flow_dpo_sft/en_0724.mp3","en_0376":"audio/rsft_flow_dpo_sft/en_0376.mp3","zh_0203":"audio/rsft_flow_dpo_sft/zh_0203.mp3","zh_0024":"audio/rsft_flow_dpo_sft/zh_0024.mp3","zh_0324":"audio/rsft_flow_dpo_sft/zh_0324.mp3","zh_0426":"audio/rsft_flow_dpo_sft/zh_0426.mp3","zh_0579":"audio/rsft_flow_dpo_sft/zh_0579.mp3","zh_0529":"audio/rsft_flow_dpo_sft/zh_0529.mp3","zh_0476":"audio/rsft_flow_dpo_sft/zh_0476.mp3","zh_0773":"audio/rsft_flow_dpo_sft/zh_0773.mp3","zh_0281":"audio/rsft_flow_dpo_sft/zh_0281.mp3","zh_0188":"audio/rsft_flow_dpo_sft/zh_0188.mp3","zh_0088":"audio/rsft_flow_dpo_sft/zh_0088.mp3","zh_0617":"audio/rsft_flow_dpo_sft/zh_0617.mp3","zh_0129":"audio/rsft_flow_dpo_sft/zh_0129.mp3","zh_0685":"audio/rsft_flow_dpo_sft/zh_0685.mp3","zh_0733":"audio/rsft_flow_dpo_sft/zh_0733.mp3","zh_0385":"audio/rsft_flow_dpo_sft/zh_0385.mp3"}};
+
+const $=s=>document.getElementById(s);
+function esc(s){return (s||"").replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function marked(t){return esc(t).replace(/\[([^\]]+)\]/g,'<mark>[$1]</mark>');}
+function slug(c){return "cat-"+c.replace(/\s+/g,'_');}
+function applyChrome(){const t=T[LANG];document.body.dataset.lang=LANG;$("langbtn").textContent=LANG==="zh"?"EN":"中";
+  $("t-title").textContent=t.title;$("t-paperlab").textContent=t.paperlab;
+  $("t-cases").textContent=t.cases;$("t-cats").textContent=t.cats;$("t-methods").textContent=t.methods;
+  // subtitle 始终中英双语 (English translation always shown)
+  $("t-sub").innerHTML=(LANG==="zh"?SUB_ZH:SUB_EN)+'<span class="en">'+(LANG==="zh"?SUB_EN:SUB_ZH)+'</span>';}
+function render(){
+  if(!DATA)return;const t=T[LANG],{METHODS,sel,groups,cats,notes}=DATA;
+  $("legend").innerHTML=METHODS.map(m=>`<span class="chip ${m.ours?'ours':''}">${m.ours?'★ ':''}${esc(m.label)}</span>`).join("");
+  $("s-cases").textContent=sel.length;$("s-cats").textContent=cats.length;$("s-methods").textContent=METHODS.length;
+  if(!sel.length){$("main").innerHTML='<div class="empty">No sample data (missing selected_ids.json / audio).</div>';return;}
+  $("catnav").innerHTML=cats.map(c=>`<a href="#${slug(c)}" data-c="${slug(c)}">${EMO[c]||'🎧'} ${esc(c)}</a>`).join("");
+  const players=it=>`<div class="m">`+METHODS.map(m=>`<div class="mrow ${m.ours?'ours':''}"><div class="mlabel">${esc(m.label)} ${m.ours?'<span class="tag-ours">OURS</span>':''}</div><audio controls preload="none" data-src="${(AUDIO[m.dir]||{})[it.id]||''}"></audio></div>`).join("")+`</div>`;
+  const card=it=>`<div class="case" data-rv><div class="id">${it.id}</div><div class="txt">${marked(it.text_marked)}</div>${notes[it.id]?`<div class="note">📝 ${esc(notes[it.id])}</div>`:''}${players(it)}</div>`;
+  const col=(L,arr)=>`<div class="langcol"><h3><span class="dot ${L}"></span>${L==='zh'?t.zh:t.en} · ${arr.length}</h3>${arr.map(card).join("")||''}</div>`;
+  $("main").innerHTML=cats.map(c=>{const g=groups[c];const n=g.zh.length+g.en.length;
+    return `<section class="cat" id="${slug(c)}"><div class="cat-h"><span class="cat-emoji">${EMO[c]||'🎧'}</span><h2>${esc(c)}<span class="zh">${ZH[c]||''}</span></h2><span class="n">${n}</span></div><div class="cat-rule"></div><div class="cols">${col('zh',g.zh)}${col('en',g.en)}</div></section>`;}).join("");
+  $("foot").innerHTML=t.foot(sel.length,cats.length);
+  // 惰性加载：卡片接近视口时才给 <audio> 赋 src，首屏不产生任何音频请求
+  const io=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting){
+    e.target.classList.add("in");
+    e.target.querySelectorAll("audio[data-src]").forEach(a=>{const s=a.dataset.src;
+      if(s){a.preload="metadata";a.src=s;a.removeAttribute("data-src");}});
+    io.unobserve(e.target);}}),{threshold:.08,rootMargin:"400px 0px"});
+  document.querySelectorAll("[data-rv]").forEach(el=>io.observe(el));
+  const links=[...document.querySelectorAll("nav.cats a")];
+  const spy=new IntersectionObserver(es=>es.forEach(e=>{if(e.isIntersecting)links.forEach(l=>l.classList.toggle("active",l.dataset.c===e.target.id));}),{rootMargin:"-40% 0px -55% 0px"});
+  document.querySelectorAll("section.cat").forEach(s=>spy.observe(s));
+}
+$("langbtn").onclick=()=>{LANG=LANG==="zh"?"en":"zh";localStorage.setItem("nvv_ui_lang",LANG);applyChrome();render();};
+$("backtop").onclick=()=>scrollTo({top:0,behavior:"smooth"});
+addEventListener("scroll",()=>{$("backtop").style.display=scrollY>600?"block":"none";});
+applyChrome();
+Promise.resolve().then(()=>{ const M=NVV_MANIFEST, selj=NVV_SEL;
+  const METHODS=M.methods,byId=Object.fromEntries(M.items.map(i=>[i.id,i]));
+  const notes={};(Array.isArray(selj)?selj:[]).forEach(x=>{const id=x.id||x;notes[id]=x.note||"";});
+  let ids=Object.keys(notes);if(!ids.length)ids=M.items.map(i=>i.id);
+  const sel=ids.map(id=>byId[id]).filter(Boolean);
+  const groups={};sel.forEach(it=>{(groups[it.event]=groups[it.event]||{zh:[],en:[]})[it.lang].push(it);});
+  const cats=Object.keys(groups).sort((a,b)=>{if(a==='burp')return 1;if(b==='burp')return -1;return a.localeCompare(b);});
+  DATA={METHODS,sel,groups,cats,notes};render();
+}).catch(e=>{$("main").innerHTML='<div class="empty">加载失败 / load error：请用 python -m http.server 启动本目录。</div>';});
+</script>
+</body>
+</html>
